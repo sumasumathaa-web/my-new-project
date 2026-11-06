@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
+import type { AuthUser } from "@/lib/db/core";
 import { safeServerSupabase } from "@/lib/supabase/server";
 import { safeServiceSupabase } from "@/lib/supabase/admin";
 
 /** Returns the authenticated user or null (never throws during build). */
-export async function getSessionUser(): Promise<User | null> {
+export async function getSessionUser(): Promise<AuthUser | null> {
   const sb = safeServerSupabase();
   if (!sb) return null;
   try {
@@ -30,14 +30,14 @@ export async function isAdminId(userId: string | null | undefined): Promise<bool
 }
 
 /** Redirects to /login when unauthenticated. Returns the user. */
-export async function requireUser(nextPath: string): Promise<User> {
+export async function requireUser(nextPath: string): Promise<AuthUser> {
   const user = await getSessionUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   return user;
 }
 
 /** Restricts a server page to admins. Redirects non-admins. */
-export async function requireAdmin(): Promise<User> {
+export async function requireAdmin(): Promise<AuthUser> {
   const user = await getSessionUser();
   if (!user) redirect(`/login?next=${encodeURIComponent("/admin")}`);
   const admin = await isAdminId(user.id);
@@ -46,7 +46,7 @@ export async function requireAdmin(): Promise<User> {
 }
 
 /** For API routes: returns [user, roles] or null. */
-export async function getApiAuth(): Promise<{ user: User; isAdmin: boolean } | null> {
+export async function getApiAuth(): Promise<{ user: AuthUser; isAdmin: boolean } | null> {
   const user = await getSessionUser();
   if (!user) return null;
   return { user, isAdmin: await isAdminId(user.id) };

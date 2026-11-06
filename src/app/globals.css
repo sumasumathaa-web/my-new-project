@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Premium wedding design system
+--------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --brand-gold: #b08d57;
+    --brand-accent: #6e1e2c;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ivory text-charcoal font-sans antialiased;
+  }
+  h1, h2, h3, .font-display {
+    @apply font-serif;
+  }
+  ::selection {
+    background: #f3ead9;
+    color: #571622;
+  }
+}
+
+@layer components {
+  .container-pad {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .section-pad {
+    @apply py-14 sm:py-20;
+  }
+  .heading-serif {
+    @apply font-serif text-charcoal;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-widest2 text-gold;
+  }
+  .hairline {
+    @apply border border-[#E8DFCE];
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold
+      transition-all duration-200 focus-visible:outline focus-visible:outline-2
+      focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-gold {
+    @apply btn text-cream shadow-card hover:brightness-95;
+    background-color: var(--brand-gold);
+  }
+  .btn-burgundy {
+    @apply btn text-cream shadow-card hover:brightness-110;
+    background-color: var(--brand-accent);
+  }
+  .btn-outline {
+    @apply btn border border-gold-light text-charcoal hover:border-gold hover:bg-champagne/60;
+  }
+  .btn-ghost {
+    @apply btn text-charcoal-soft hover:bg-champagne/70;
+  }
+
+  /* Forms */
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-charcoal-soft;
+  }
+  .input {
+    @apply w-full rounded-xl border border-[#E0D5C0] bg-cream px-4 py-2.5 text-sm text-charcoal
+      placeholder:text-charcoal-muted/70 shadow-none transition
+      focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30;
+  }
+  .input-error {
+    @apply border-burgundy focus:border-burgundy focus:ring-burgundy/30;
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-2xl border border-[#E8DFCE] bg-cream shadow-card;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-gold { @apply badge bg-[#F0E4CF] text-gold-dark; }
+  .badge-green { @apply badge bg-[#E4EFE3] text-[#2F6B38]; }
+  .badge-red { @apply badge bg-[#F6E2E4] text-burgundy; }
+  .badge-amber { @apply badge bg-[#F6ECD9] text-[#8A6A1F]; }
+  .badge-blue { @apply badge bg-[#E3ECF6] text-[#2C5177]; }
+  .badge-gray { @apply badge bg-[#ECE9E4] text-charcoal-soft; }
+
+  /* Motion (restrained) */
+  .reveal {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .link-underline {
+    @apply relative text-charcoal-soft transition-colors hover:text-burgundy;
+  }
+  .link-underline::after {
+    content: "";
+    @apply absolute -bottom-0.5 left-0 h-px w-0 bg-burgundy transition-all duration-200;
+  }
+  .link-underline:hover::after { width: 100%; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .clip-arch {
+    border-radius: 12rem 12rem 1rem 1rem;
+  }
+}
