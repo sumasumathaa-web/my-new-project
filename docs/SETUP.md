@@ -8,6 +8,21 @@ This walks a fresh machine + fresh Supabase project to a working storefront. Exp
 - A free Supabase project (https://supabase.com → New project; region closest to your customers)
 - (Payments) A Razorpay account — https://dashboard.razorpay.com → Settings → API Keys
 
+## Step 0 — Two ways to run this project
+
+| Mode | When | Database | Auth | Storage |
+|---|---|---|---|---|
+| **Local embedded** (default with no credentials) | Evaluating, designing, offline development | Embedded PostgreSQL (PGlite) at `.data/pglite` | Local cookie sessions (scrypt) | `.data/storage` served by `/media` |
+| **Supabase** (production) | Staging/production | Supabase Postgres + RLS | Supabase Auth | Supabase Storage buckets |
+
+The local mode applies **the same migrations and seed** as Supabase, so behaviour matches. It is disabled
+automatically on Vercel or as soon as `NEXT_PUBLIC_SUPABASE_URL` + anon key are set.
+
+```bash
+npm install && npm run dev     # local embedded DB, demo logins shown in README
+rm -rf .data                   # reset the local database
+```
+
 ## Step 1 — Get the code
 
 ```bash

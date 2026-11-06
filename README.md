@@ -1,130 +1,155 @@
 # Wedding Invitation Platform
 
-A complete, production-grade e-commerce platform for digital wedding stationery — invitation videos, digital cards, wedding websites, save-the-dates, quote wording packs and custom design services.
+A production-grade e-commerce platform for digital wedding stationery — invitation videos, wedding
+websites, digital cards, save-the-dates, quote/wording packs and custom design services.
 
-**Stack**: Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (Postgres + Auth + Storage) · Razorpay (INR payments) · Vitest
+**Stack:** Next.js 14 (App Router) · TypeScript · Tailwind CSS · Supabase (Postgres + Auth + Storage) ·
+Razorpay (INR) · Vitest · Vercel
 
-> "Your Brand Name" is a placeholder. Everything customer-facing (name, logo, colors, contact details, social links, hero copy, announcement bar, footer, default language/currency/tax) is edited from **Admin → Settings / Homepage** and updates the live site immediately — no code changes, no redeploy.
+> **Branding is not hardcoded.** Every customer-facing string (business name, tagline, logo, colours,
+> contact details, socials, hero copy, announcement bar, footer, policies) is stored in the database and
+> edited from **Admin → Branding & Settings / Homepage Editor**. “Your Brand Name” is only a placeholder
+> default until the owner sets their own.
 
 ---
 
-## 1. Quick start (local)
+## 1. Run it locally (no external services required)
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in values (see §3)
-npm run dev                  # http://localhost:3000
+npm run dev          # http://localhost:3000
 ```
 
-Then provision the database and first admin (§4).
+With **no Supabase credentials present**, the app starts an **embedded PostgreSQL** (PGlite — Postgres
+compiled to WebAssembly) inside `.data/`, applies the *same* SQL migrations and seed file that Supabase
+uses, and creates two demo accounts. This is a real SQL database, not mocked data, so every page,
+admin action, cart and order works offline.
 
-## 2. What exists
+| Local demo login | Email | Password |
+|---|---|---|
+| Administrator | `admin@yourbrand.local` | `Password123!` |
+| Customer | `customer@yourbrand.local` | `Password123!` |
 
-### Customer-facing storefront
+Override the demo password with `LOCAL_DEMO_PASSWORD`, or delete `.data/` to re-bootstrap from scratch.
+Local mode is automatically disabled on Vercel and whenever Supabase credentials exist.
+
+## 2. Run it against Supabase (production parity)
+
+```bash
+cp .env.example .env.local     # add your Supabase URL, anon key, service-role key
+npm run dev
+```
+
+Then apply `supabase/migrations/*.sql` (in order) and `supabase/seed.sql` in the Supabase SQL editor,
+or with the Supabase CLI (`supabase db push`). Full walkthrough: **[docs/SETUP.md](docs/SETUP.md)**.
+
+Create the first administrator with a password of your choosing (never commit it):
+
+```bash
+node scripts/grant-admin.mjs you@example.com 'YourStrongPassword!' --create
+```
+
+Sign-up in the app creates *customers* only; the admin role is granted by this script (or by an existing
+admin in **Admin → User Roles**). There is no public path to admin.
+
+## 3. What is implemented
+
+### Storefront
 | Area | Routes |
 |---|---|
-| Home (composition controlled by Homepage Editor) | `/` |
-| Catalog landings | `/invitation-videos`, `/digital-cards`, `/invitation-websites`, `/save-the-date`, `/engagement-invitations`, `/reception-invitations`, `/custom-design`, `/themes`, `/quotes`, `/offers`, `/faqs` |
-| Product detail (gallery, video preview, demo link, add-ons, live customization schema) | `/products/[slug]` |
-| Discovery | `/search` |
-| Commerce | `/cart`, `/checkout`, `/checkout/success/[orderId]`, `/checkout/failed` |
+| Home (sections, order and visibility controlled by the Homepage Editor) | `/` |
+| Category landings | `/invitation-videos`, `/invitation-websites`, `/digital-cards`, `/engagement-invitations`, `/reception-invitations`, `/save-the-date`, `/custom-design` |
+| Themes / quotes / offers / FAQs | `/themes`, `/quotes`, `/offers`, `/faqs` |
+| Product detail (gallery, video preview, live demo link, add-ons, dynamic pricing) | `/products/[slug]` |
+| Search + filters (kind, price, sort, pagination) | `/search` |
+| Cart / checkout / result pages | `/cart`, `/checkout`, `/checkout/success/[orderId]`, `/checkout/failed` |
 | Auth | `/login`, `/register`, `/forgot-password`, `/auth/reset`, `/auth/callback` |
-| Content/legal (DB-editable) | `/about`, `/privacy-policy`, `/terms`, `/refund-policy`, `/delivery-policy`, `/license` |
-| Support | `/contact` |
-| Live invitations | `/w/[slug]` (public when published), `/rsvp/[slug]` |
-| Custom 404 | `not-found.tsx` |
+| Legal & content (DB-editable) | `/about`, `/privacy-policy`, `/terms`, `/refund-policy`, `/delivery-policy`, `/license` |
+| Contact + support | `/contact` |
+| Live invitations (public when published) + RSVP | `/w/[slug]`, `/rsvp/[slug]` |
+| 404 / error | `not-found.tsx`, `error.tsx` |
 
 ### Customer account
-`/account` (profile + notification consent) · `/account/orders` + `/account/orders/[id]` (status timeline, deliverable downloads via signed URLs, only after payment) · `/account/favorites` · `/account/support` + thread view · `/account/customizations` (draft list) · `/account/customizations/new` · `/account/customizations/[id]` — schema-driven editor with live preview, revision history, publish/unpublish.
+`/account` (profile, marketing consent) · `/account/orders` + `/account/orders/[id]` (status timeline,
+signed deliverable downloads only after verified payment) · `/account/favorites` ·
+`/account/customizations` (draft/published list) · `/account/customizations/new` ·
+`/account/customizations/[id]` — schema-driven editor with live preview, revision history, publish/unpublish ·
+`/account/support` (+ thread).
 
-### Admin dashboard (`/admin`, requires `admin` role)
-Overview (real stats) · Products (list/search/bulk status/duplicate) + rich editor (pricing invariants enforced: `sale < selling ≤ original`, JSON schema validation for customization fields & add-ons, gallery manager) · Categories (with delete-guard against attached products, ↑↓ reorder) · Themes · Quotes & Content (quotes/FAQs/policy pages) · Offers & Coupons (coupons + promo banners + usage report) · Orders (filters, CSV export, order detail: status transitions + customer emails, internal notes, offline payment recording with amount attestation, cancel rules, refunds) · Customers (search, order history, spend) · Media library (upload/rename/delete, public bucket) · Homepage editor (hero, announcement bar, section visibility & order, footer blurb) · Customer websites (draft/published/archived moderation) · Support inbox (thread reply → email) · Reports (7/30/90-day revenue, status distribution, best sellers, coupons, catalogue health) · Settings (branding, contact, socials, SEO defaults, regional/tax; payment & email **status indicators** — secrets stay in env vars only) · Roles (grant/revoke admin/editor/support; self-revoke blocked) · Audit logs (every admin mutation, payment event, role change).
+### Admin dashboard (`/admin`, `admin` role required, checked server-side)
+Overview (live KPIs) · Products (+ editor with server-enforced pricing rules, gallery, JSON validation,
+duplicate/bulk actions) · Categories (reorder, delete guards) · Themes · Quotes & Content (quotes, FAQs,
+policy pages, promotional content) · Offers & Coupons (percentage/fixed, min purchase, caps, usage limits,
+first-order, product/category scope, banners, usage report) · Orders (filters, CSV export, status timeline,
+internal + customer notes, offline payment recording, refunds) · Customers · Media Library · Homepage Editor
+(hero, announcement, section order/visibility) · Customer Websites (moderation) · Support inbox · Reports ·
+Branding & Settings · User Roles · Audit Logs.
 
-## 3. Environment variables (`.env.example` is the template)
+### Invitation website engine
+Products can declare a JSON customisation schema (`text`, `textarea`, `date`, `time`, `color`, `select`,
+`url`, `image`, `checkbox`). Customers fill it in with a **live preview**, save drafts, publish a
+**customer-specific URL** and restore revisions. Publishing requires a paid order for that product and is
+verified server-side; each customer's configuration lives in its own row, so publishing one invitation can
+never touch another's. Guests can RSVP on published invitations; RSVPs are only readable by the owner/admin.
+
+### Commerce & payments
+The browser only ever sends *product ids, quantities, add-ons and a coupon code*; prices, discounts, tax and
+totals are recomputed server-side from database rows. An order can become `paid` only through:
+
+1. Razorpay checkout **signature verification** (`/api/payments/verify`),
+2. Razorpay **webhook** with a valid `X-Razorpay-Signature` (`/api/webhooks/razorpay`), or
+3. an admin recording an **offline payment** (audited, amount-attested, never marked signature-verified).
+
+All three are idempotent (unique `provider_payment_id` / `event_id`), and visiting a success page never
+changes payment state.
+
+## 4. Verification performed
+
+```bash
+npm run typecheck   # strict TypeScript — passes
+npm run test        # 46 tests — passes
+npm run build       # production build — passes
+```
+
+46 automated tests: 29 unit tests (paise arithmetic, sale-price invariants, add-on allow-lists,
+customisation fees, coupon rules, tax-on-discounted-base, Razorpay HMAC accept/reject/tamper, validators)
+and 17 integration tests that run against a real Postgres database built from the same migrations/seed:
+catalogue reads, search/filter/sort/pagination, admin product create→publish→delete persistence, coupon
+validation from rows, order creation, duplicate-payment idempotency, ownership isolation, status history,
+dashboard stats, per-customer invitation isolation and publishing, and storage path/signature rules.
+
+Also verified by crawling the running app: 86 internal links, 0 broken.
+
+## 5. Environment variables
+
+See `.env.example` (template only — secrets are never committed). Summary:
 
 | Variable | Purpose |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project URL + public anon key (browser-safe) |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Server-only** key used by server actions/API routes |
-| `SUPABASE_DB_URL` | Direct Postgres URI (scripts: seed, grant-admin, backups) |
-| `NEXT_PUBLIC_SITE_URL` | Canonical URL (sitemap, emails, OAuth redirects) |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | Razorpay keys; webhook secret verifies `payment.captured` events |
-| `PAYMENTS_TEST_MODE` | `true` = test-friendly flow (order placed without Razorpay modal; clearly labelled). Set `false` only when live keys are in place. |
-| `EMAIL_PROVIDER` + keys (`EMAIL_API_KEY`/`RESEND_API_KEY`/`POSTMARK_SERVER_TOKEN`/`SENDGRID_API_KEY`/`SMTP_URL`) / `EMAIL_FROM` | Transactional email. Default `log` = write to audit log instead of sending. Failures never break checkout. |
-| `ADMIN_SETUP_EMAILS` | Comma-separated emails allowed to receive admin via `scripts/grant-admin.mjs` |
-| `STORAGE_BUCKET_PUBLIC` / `STORAGE_BUCKET_CUSTOMER` / `STORAGE_BUCKET_DELIVERABLES` | Bucket names created by migration 0001 |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project URL + public anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Server-only** key for server actions/routes |
+| `SUPABASE_DB_URL` | Direct Postgres URI for scripts/backups |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL (sitemap, emails, auth redirects) |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Razorpay keys |
+| `PAYMENTS_TEST_MODE` | `true` (default) = orders stay *pending payment* until an admin verifies |
+| `EMAIL_PROVIDER` + provider keys, `EMAIL_FROM` | Transactional email (`log` = write to audit log) |
+| `ADMIN_SETUP_EMAILS` | Emails allowed to be promoted by `scripts/grant-admin.mjs` |
+| `STORAGE_BUCKET_PUBLIC` / `_CUSTOMER` / `_DELIVERABLES` | Bucket names created by migration 0001 |
+| `LOCAL_DB`, `LOCAL_DB_DIR`, `LOCAL_DEMO_PASSWORD`, `LOCAL_MEDIA_SECRET` | Local embedded-database mode only |
 
-**Never** commit `.env.local` — it is git-ignored. Secrets are read only in server code.
+## 6. Deployment
 
-## 4. Database setup
+Vercel + Supabase, driven from this GitHub repository. Step-by-step (including Razorpay webhooks, domain
+setup, backups and rollback): **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. Architecture and design
+decisions: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**. Feature-by-feature status:
+**[docs/CHECKLIST.md](docs/CHECKLIST.md)**.
 
-Migrations live in `supabase/migrations/` (run in filename order against your Supabase SQL editor, or via Supabase CLI `supabase db push`).
+## 7. Known limitations (explicit)
 
-- `0001_init.sql` — schema: products, categories, themes, quotes, FAQs, orders, order_items, payments, coupons, coupon_usages, customizations, revisions, support threads, media registry, site_settings, audit_logs, RLS policies, storage buckets (`public-media` public; `customer-uploads` + `deliverables` private).
-- `supabase/seed.sql` — **demo catalog** (12 fictional products clearly tagged "(DEMO)", demo categories, quote wording, FAQs, policy pages, a demo coupon). Safe to delete; admin can mark them archived.
-
-After migrations:
-
-```bash
-# create the first admin (creates auth account if missing)
-node scripts/grant-admin.mjs you@example.com "YourStr0ngPass!" --create
-```
-
-## 5. Payments flow (how "paid" can ever happen)
-
-Only THREE paths can set `payment_status = 'paid'`:
-
-1. **Razorpay checkout verify** (`/api/payments/verify`) — requires a valid `order_id|payment_id` HMAC signature. Idempotent via unique `provider_payment_id`.
-2. **Razorpay webhook** (`/api/webhooks/razorpay`) — validates `X-Razorpay-Signature` over the *raw* body; handles `payment.captured` / `payment.failed`. Idempotent via unique `webhook_event_id`.
-3. **Admin "record offline payment"** — requires the exact order total + reference + explicit confirmation checkbox; audited, and it never claims `signature_verified`.
-
-Visiting `/checkout/success/[orderId]` is read-only. Prices, add-ons, taxes, totals and coupon discounts are **always recomputed server-side** from DB rows — anything the browser posts is treated only as a list of product ids + quantities.
-
-## 6. Customization engine
-
-- Admin marks a product "customer can personalise" and provides a JSON schema of fields (`text/textarea/date/time/color/select/url/image/checkbox`).
-- Customer buys it → `/account/customizations/new` creates a draft → editor (`/account/customizations/[id]`) shows live preview of the final invitation page.
-- Publishing requires a paid order containing that product (server-checked, HTTP 403 otherwise).
-- Published invite is public at `/w/[slug]` with guest RSVP (`show_rsvp` field) and live countdown. Revisions are versioned; restore supported.
-
-## 7. Media
-
-- Public images/video previews → `public-media` (Media Library).
-- Customer invitation uploads → `customer-uploads/…/invites/{uid}/` (public read by design — `/w/[slug]` is a public page; documented).
-- Deliverables → `deliverables/{userId}/{orderId}/…` served only via 5-minute signed URLs, and only after payment.
-
-## 8. Tests
-
-```bash
-npm run test       # vitest: pricing engine, coupon rules, Razorpay signatures, validation
-npm run typecheck  # strict TS
-npm run build      # production build
-```
-
-29 unit tests cover: paise arithmetic, sale-price invariants, add-on whitelist, customization fee rules, coupon min/max/limit/first-order/scope rules, tax-on-discounted-base, HMAC signature accept/reject/tamper cases, input validators.
-
-## 9. Deployment
-
-1. Create a Supabase project; run migrations + seed; note URL, anon key, service role key, DB URI.
-2. Push this repo to GitHub; import into Vercel; set env vars from `.env.local` equivalents (never commit the file).
-3. In Supabase Auth: set Site URL + redirect URLs (`https://your-domain/auth/callback`).
-4. In Razorpay dashboard: create webhook → `https://your-domain/api/webhooks/razorpay`, events `payment.captured`, `payment.failed`; set `RAZORPAY_WEBHOOK_SECRET`.
-5. Set `PAYMENTS_TEST_MODE=false` only after test orders succeed.
-6. Grant yourself admin: `node scripts/grant-admin.mjs you@example.com --create "…"`.
-
-## 10. Demo logins (this workspace's seeded project)
-
-| Purpose | Login |
-|---|---|
-| Admin | `demo-admin@yourbrand.example` |
-| Customer | `demo-customer@example.com` |
-
-Passwords were generated during setup — see your local notes; rotate before any real launch.
-
-## 11. Security notes
-
-- RLS enabled on every table; admin checks enforced server-side on every action; API routes return 401/403 without sessions/roles.
-- Order/payment writes only in service-role server code; customers never write orders directly.
-- Rate limiting on checkout, coupon validation, uploads, contact, RSVP, customization saves, admin uploads.
-- Inputs validated (length, enum, hex color, URL scheme, slug/uuid formats). XSS-safe by React escaping; markdown-lite renderer escapes HTML before transform.
-- Audit log is append-only.
+- **Payments run in test mode** until Razorpay keys are configured; orders are created as *pending payment*
+  and no payment is ever simulated or auto-confirmed.
+- **Transactional email** defaults to `log` (audit log) because no email provider credentials exist yet.
+  Order/status emails are wired and queued at the call sites.
+- **Media**: no product images/videos are seeded (the design renders elegant SVG/CSS artwork instead).
+  Upload real assets in **Admin → Media Library**; Supabase Storage buckets are created by the migration.
+- The embedded local database is for development/preview only; it is intentionally disabled on Vercel.

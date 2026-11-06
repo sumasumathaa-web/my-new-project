@@ -1,5 +1,29 @@
 # Deployment — Vercel + Supabase
 
+> **This repository is already wired to a live environment** (see §0). Everything below is how to repeat it
+> for a new domain or a fresh project.
+
+## 0. Current live configuration
+
+| Piece | Value |
+|---|---|
+| Source of truth | GitHub `sumasumathaa-web/my-new-project` |
+| Hosting | Vercel project `wedding-invitation-platform` (`prj_Xi1mZm3BsjdFsPRdQXNqrpP8BMED`, team `sums3`) |
+| Production branch | `main` (this work was delivered on `arena/947d9e6a-my-new-project`; merge it into `main` for auto-deploys) |
+| Database/Auth/Storage | Supabase project `wedding-invites` (`eowsbcxmbebohrnwkzmw`, region `ap-south-1`) with all migrations + seed applied |
+| Domain | `https://wedding-invitation-platform-sums3.vercel.app` |
+| Payments | Test mode (`PAYMENTS_TEST_MODE=true`, no Razorpay keys yet) |
+| Email | `EMAIL_PROVIDER=log` (no provider configured yet) |
+
+**Deployment protection:** the Vercel project currently has *Vercel Authentication* enabled for non-custom
+domains (`ssoProtection: all_except_custom_domains`). For a public storefront, open
+**Vercel → Project → Settings → Deployment Protection** and switch it off (or attach your own domain, which is
+excluded from that protection), then reload the URL.
+
+**Auto-deploy:** the Git integration was created with `createDeployments: disabled`, so pushes do not deploy
+by themselves. Enable **Settings → Git → Deploy on push** (or merge to `main` and deploy once) before relying
+on push-to-deploy.
+
 ## 1. Push to GitHub
 
 ```bash
