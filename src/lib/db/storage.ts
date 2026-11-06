@@ -1,7 +1,6 @@
 /** Supabase Storage helpers (server only). */
 import { safeServiceSupabase } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
-import { localModeEnabled } from "@/lib/local/config";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
 export const MAX_VIDEO_BYTES = 60 * 1024 * 1024; // 60 MB
@@ -25,21 +24,9 @@ export function extensionFor(mime: string): string {
   );
 }
 
+export { isStoragePath, mediaUrl } from "@/lib/media";
 export function publicUrl(bucket: string, path: string): string {
   return `${env.supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;
-}
-
-/** True when a product/media path points to a publicly renderable storage object. */
-export function isStoragePath(p: string | null | undefined): p is string {
-  return Boolean(p && !p.startsWith("http") && p.length > 2 && p.length < 400);
-}
-
-export function mediaUrl(path: string | null | undefined, bucket?: string): string | null {
-  if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("/")) return path;
-  // Local dev: media is served by the /media route from .data/storage.
-  if (localModeEnabled()) return `/media/${bucket ?? env.bucketPublic}/${path.replace(/^\/+/, "")}`;
-  return publicUrl(bucket ?? env.bucketPublic, path);
 }
 
 export async function uploadObject(params: {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { discountPercent, effectivePriceRupees, formatINR } from "@/lib/money";
-import { mediaUrl } from "@/lib/db/storage";
+import { mediaUrl } from "@/lib/media";
 import { ProductArt } from "@/components/product-art";
 import { Badge } from "@/components/ui";
 import { AddToCartButton } from "@/components/cart-buttons";

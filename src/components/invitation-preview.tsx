@@ -1,5 +1,5 @@
 import { getEventDate } from "@/lib/customization-schema";
-import { mediaUrl } from "@/lib/db/storage";
+import { mediaUrl } from "@/lib/media";
 import { CountdownTimer } from "@/components/countdown";
 import { RsvpForm } from "@/components/rsvp-form";
 
