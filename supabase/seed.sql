@@ -27,7 +27,7 @@ insert into public.site_settings (key, value) values
 ('homepage', '{
   "heroTitle": "Invitations as memorable as the day itself",
   "heroSubtitle": "Handcrafted wedding invitation videos, bespoke wedding websites and elegant digital cards — delivered fast, personalised completely.",
-  "heroImagePath": null,
+  "heroImagePath": "/images/hero-invitation.jpg",
   "heroVideoUrl": "",
   "heroCtaLabel": "Browse Invitations",
   "heroCtaUrl": "/invitation-videos",
@@ -329,3 +329,26 @@ Tell your story here. Replace this template with your studio's history, craft an
 
 *Demonstration content.*$a$)
 on conflict (slug) do nothing;
+
+-- ============================================================================
+-- Demonstration artwork shipped with the app (public/images/*.jpg).
+-- Admin can replace any of these in Admin → Media Library / product editor.
+-- Only fills empty slots, so real uploads are never overwritten.
+-- ============================================================================
+update public.site_settings
+set value = jsonb_set(value, '{heroImagePath}', '"/images/hero-invitation.jpg"'::jsonb)
+where key = 'homepage' and (value->>'heroImagePath') is null;
+
+with ranked as (
+  select id, kind, row_number() over (partition by kind order by sort_order, name) as rn
+  from public.products
+  where thumbnail_path is null and kind in ('video', 'website', 'card')
+)
+update public.products p
+set thumbnail_path = case r.kind
+      when 'video' then case when r.rn % 2 = 1 then '/images/product-video.jpg' else '/images/product-video-2.jpg' end
+      when 'website' then case when r.rn % 2 = 1 then '/images/product-website.jpg' else '/images/product-website-2.jpg' end
+      else case when r.rn % 2 = 1 then '/images/product-card.jpg' else '/images/product-card-2.jpg' end
+    end
+from ranked r
+where p.id = r.id;
