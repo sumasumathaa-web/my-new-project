@@ -77,32 +77,64 @@ export default async function HomePage() {
 
   const blocks: Record<string, React.ReactNode> = {
     hero: (
-      <section key="hero" className="relative overflow-hidden border-b border-[#E8DFCE]">
-        <div className="container-pad grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-2">
-          <div>
-            <p className="eyebrow mb-4">{branding.tagline}</p>
-            <h1 className="text-balance font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
+      <section key="hero" className="paper relative overflow-hidden border-b border-[#E8DFCE]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-32 h-[26rem] w-[26rem] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(176,141,87,0.20), transparent 65%)" }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-40 -left-24 h-[24rem] w-[24rem] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(110,30,44,0.10), transparent 65%)" }}
+        />
+        <div className="container-pad relative grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          <div className="fade-up">
+            <p className="eyebrow mb-5 flex items-center gap-3">
+              <span aria-hidden className="inline-block h-px w-8 bg-gold/60" />
+              {branding.tagline}
+            </p>
+            <h1 className="display-xl text-balance font-serif text-charcoal">
               {homepage.heroTitle}
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-charcoal-muted sm:text-lg">
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-charcoal-muted sm:text-lg">
               {homepage.heroSubtitle}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={homepage.heroCtaUrl || "/invitation-videos"} className="btn-gold">
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Link href={homepage.heroCtaUrl || "/invitation-videos"} className="btn-gold px-7 py-3.5">
                 {homepage.heroCtaLabel || "Browse"}
               </Link>
-              <Link href={homepage.heroCta2Url || "/contact"} className="btn-outline">
+              <Link href={homepage.heroCta2Url || "/contact"} className="btn-outline px-7 py-3.5">
                 {homepage.heroCta2Label || "Learn more"}
               </Link>
             </div>
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-[#E8DFCE] pt-6">
+              {[
+                { k: "48 hrs", v: "First draft" },
+                { k: "2 included", v: "Revisions" },
+                { k: "100%", v: "Original design" },
+              ].map((item) => (
+                <div key={item.k}>
+                  <dt className="font-serif text-lg text-burgundy">{item.k}</dt>
+                  <dd className="text-xs uppercase tracking-widest2 text-charcoal-muted">{item.v}</dd>
+                </div>
+              ))}
+            </dl>
             {heroBanners[0] ? (
-              <p className="mt-8 inline-flex items-center gap-2 rounded-full bg-champagne px-4 py-2 text-sm text-burgundy">
-                ✦ {heroBanners[0].title} — {heroBanners[0].subtitle}
+              <p className="mt-8 inline-flex flex-wrap items-center gap-2 rounded-full border border-gold-light bg-cream/80 px-4 py-2 text-sm text-burgundy">
+                <span aria-hidden className="text-gold">✦</span>
+                <strong className="font-medium">{heroBanners[0].title}</strong>
+                <span className="text-charcoal-muted">{heroBanners[0].subtitle}</span>
               </p>
             ) : null}
           </div>
-          <div className="relative">
-            <div className="clip-arch overflow-hidden border border-[#E8DFCE] bg-champagne shadow-soft">
+
+          <div className="relative fade-up fade-up-2">
+            <div
+              aria-hidden
+              className="absolute inset-x-6 -bottom-4 top-10 rounded-[14rem_14rem_2rem_2rem] border border-gold/25"
+            />
+            <div className="clip-arch relative overflow-hidden border border-[#E8DFCE] bg-champagne shadow-soft">
               {homepage.heroVideoUrl ? (
                 <video className="h-full w-full object-cover" src={homepage.heroVideoUrl} autoPlay muted loop playsInline />
               ) : heroImage ? (
@@ -110,23 +142,44 @@ export default async function HomePage() {
                 <img src={heroImage} alt="Featured wedding invitation" className="h-full w-full object-cover" />
               ) : (
                 <svg viewBox="0 0 500 620" className="h-auto w-full" role="img" aria-label="Elegant invitation artwork">
-                  <rect width="500" height="620" fill="#F3EAD9" />
-                  <circle cx="250" cy="270" r="150" fill="none" stroke="#B08D57" strokeWidth="1.2" />
-                  <circle cx="250" cy="270" r="118" fill="none" stroke="#B08D57" strokeOpacity="0.5" />
-                  <text x="250" y="258" textAnchor="middle" fontFamily="Georgia, serif" fontSize="44" fill="#6E1E2C">
+                  <defs>
+                    <linearGradient id="heroCard" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#F7EFDF" />
+                      <stop offset="100%" stopColor="#EFE3CD" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="500" height="620" fill="url(#heroCard)" />
+                  <circle cx="250" cy="268" r="158" fill="none" stroke="#B08D57" strokeWidth="1" strokeOpacity="0.55" />
+                  <circle cx="250" cy="268" r="132" fill="none" stroke="#B08D57" strokeWidth="1.6" />
+                  <circle cx="250" cy="268" r="98" fill="none" stroke="#6E1E2C" strokeWidth="0.8" strokeOpacity="0.35" />
+                  <text x="250" y="196" textAnchor="middle" fontFamily="Georgia, serif" fontSize="13" fill="#8F6F42" letterSpacing="6">
+                    TOGETHER WITH FAMILIES
+                  </text>
+                  <text x="250" y="262" textAnchor="middle" fontFamily="Georgia, serif" fontSize="46" fill="#6E1E2C">
                     Ananya
                   </text>
-                  <text x="250" y="296" textAnchor="middle" fontFamily="Georgia, serif" fontSize="30" fill="#B08D57">
+                  <text x="250" y="302" textAnchor="middle" fontFamily="Georgia, serif" fontSize="26" fill="#B08D57">
                     &amp;
                   </text>
-                  <text x="250" y="338" textAnchor="middle" fontFamily="Georgia, serif" fontSize="44" fill="#6E1E2C">
+                  <text x="250" y="348" textAnchor="middle" fontFamily="Georgia, serif" fontSize="46" fill="#6E1E2C">
                     Arjun
                   </text>
-                  <text x="250" y="470" textAnchor="middle" fontFamily="Georgia, serif" fontSize="15" fill="#7A7066" letterSpacing="4">
-                    14 · 02 · 2027 — MADURAI
+                  <line x1="150" y1="382" x2="350" y2="382" stroke="#B08D57" strokeOpacity="0.5" />
+                  <text x="250" y="418" textAnchor="middle" fontFamily="Georgia, serif" fontSize="16" fill="#571622" letterSpacing="3">
+                    14 · 02 · 2027
+                  </text>
+                  <text x="250" y="446" textAnchor="middle" fontFamily="Georgia, serif" fontSize="12" fill="#7A7066" letterSpacing="5">
+                    MADURAI
+                  </text>
+                  <text x="250" y="540" textAnchor="middle" fontFamily="Georgia, serif" fontSize="11" fill="#9C8A6B" letterSpacing="4">
+                    {branding.businessName.toUpperCase()}
                   </text>
                 </svg>
               )}
+            </div>
+            <div className="float-soft absolute -left-3 bottom-8 hidden rounded-2xl border border-[#E8DFCE] bg-cream/95 px-4 py-3 shadow-card sm:block">
+              <p className="text-[10px] uppercase tracking-widest2 text-charcoal-muted">Delivered digitally</p>
+              <p className="font-serif text-lg text-burgundy">Ready in 48 hours</p>
             </div>
           </div>
         </div>

@@ -15,9 +15,12 @@ export default async function AdminOverview() {
     getBestSellers(5),
   ]);
   const sb = safeServiceSupabase();
-  const { data: activity } = sb
-    ? await sb.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(8)
-    : { data: [] };
+  const [{ data: activity }, { count: openTickets }] = sb
+    ? await Promise.all([
+        sb.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(8),
+        sb.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
+      ])
+    : [{ data: [] }, { count: 0 }];
 
   const cards = [
     { label: "Verified revenue", value: formatPaiseINR(stats.revenuePaise), accent: true },
@@ -32,14 +35,53 @@ export default async function AdminOverview() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-2xl text-charcoal">Today at a glance</h2>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            Live figures from the database — nothing here is a placeholder.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/products/new" className="btn-burgundy px-4 py-2 text-xs">+ New product</Link>
+          <Link href="/admin/offers" className="btn-outline px-4 py-2 text-xs">Create coupon</Link>
+          <Link href="/admin/homepage" className="btn-outline px-4 py-2 text-xs">Edit homepage</Link>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="card p-4">
-            <p className="text-xs uppercase tracking-wide text-charcoal-muted">{c.label}</p>
-            <p className={`mt-1 font-serif text-2xl ${c.accent ? "text-burgundy" : "text-charcoal"}`}>{c.value}</p>
+          <div key={c.label} className="kpi">
+            <p className="text-[10px] font-semibold uppercase tracking-widest2 text-charcoal-muted">{c.label}</p>
+            <p className={`mt-1.5 font-serif text-[1.7rem] leading-none ${c.accent ? "text-burgundy" : "text-charcoal"}`}>
+              {c.value}
+            </p>
           </div>
         ))}
       </div>
+
+      <section className="card p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-lg text-charcoal">Needs attention</h2>
+          <Link href="/admin/status" className="text-xs text-burgundy underline">System status</Link>
+        </div>
+        <ul className="grid gap-2 text-sm sm:grid-cols-3">
+          <li className="card-inset flex items-center justify-between px-4 py-3">
+            <span className="text-charcoal-soft">Awaiting payment</span>
+            <Link href="/admin/orders?status=pending_payment" className="font-serif text-lg text-burgundy">{stats.pending}</Link>
+          </li>
+          <li className="card-inset flex items-center justify-between px-4 py-3">
+            <span className="text-charcoal-soft">Awaiting customer info</span>
+            <Link href="/admin/orders?status=awaiting_customer_information" className="font-serif text-lg text-burgundy">
+              {stats.awaitingInfo}
+            </Link>
+          </li>
+          <li className="card-inset flex items-center justify-between px-4 py-3">
+            <span className="text-charcoal-soft">Open support tickets</span>
+            <Link href="/admin/support" className="font-serif text-lg text-burgundy">{openTickets ?? 0}</Link>
+          </li>
+        </ul>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card p-6">

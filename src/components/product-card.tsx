@@ -11,7 +11,7 @@ export function ProductCard({ product }: { product: Product }) {
   const off = discountPercent(product.price_original, price);
   const image = mediaUrl(product.thumbnail_path);
   return (
-    <article className="card group flex h-full flex-col overflow-hidden">
+    <article className="card card-hover group flex h-full flex-col overflow-hidden">
       <Link href={`/products/${product.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-champagne">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -22,11 +22,18 @@ export function ProductCard({ product }: { product: Product }) {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <ProductArt
-            name={product.name}
-            kind={product.kind}
-            className="h-full w-full transition-transform duration-500 group-hover:scale-[1.03]"
-          />
+          <>
+            <ProductArt
+              name={product.name}
+              kind={product.kind}
+              className="h-full w-full transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{ background: "linear-gradient(160deg, rgba(255,255,255,0) 45%, rgba(110,30,44,0.10) 100%)" }}
+            />
+          </>
         )}
         <div className="absolute left-3 top-3 flex gap-2">
           {off ? <Badge tone="gold">−{off}%</Badge> : null}
@@ -48,9 +55,15 @@ export function ProductCard({ product }: { product: Product }) {
         ) : null}
         <div className="mt-auto pt-4">
           <div className="flex items-baseline gap-2">
-            <span className="font-serif text-xl text-burgundy">{formatINR(price)}</span>
+            <span className="font-serif text-[1.35rem] leading-none text-burgundy">{formatINR(price)}</span>
             {off ? <span className="text-sm text-charcoal-muted line-through">{formatINR(product.price_original)}</span> : null}
+            {product.delivery_estimate ? (
+              <span className="ml-auto text-[11px] uppercase tracking-widest2 text-charcoal-muted">
+                {product.delivery_estimate}
+              </span>
+            ) : null}
           </div>
+          <div className="mt-1.5 h-px w-full bg-gradient-to-r from-gold/40 via-gold/15 to-transparent" />
           <div className="mt-3 flex items-center gap-2">
             <AddToCartButton
               product={{
@@ -62,8 +75,11 @@ export function ProductCard({ product }: { product: Product }) {
                 customizationEnabled: product.customization_enabled,
               }}
             />
-            <Link href={`/products/${product.slug}`} className="btn-ghost px-4 py-2 text-xs">
-              Details
+            <Link
+              href={`/products/${product.slug}`}
+              className="btn-ghost px-4 py-2 text-xs group-hover:text-burgundy"
+            >
+              Details <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
             </Link>
           </div>
         </div>

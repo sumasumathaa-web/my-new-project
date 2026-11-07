@@ -257,6 +257,7 @@ export async function getOrderStats() {
     totalOrders: 0,
     pending: 0,
     inProgress: 0,
+    awaitingInfo: 0,
     completed: 0,
     cancelled: 0,
     revenuePaise: 0,
@@ -275,6 +276,7 @@ export async function getOrderStats() {
     stats.totalOrders += 1;
     if (o.status === "pending_payment") stats.pending += 1;
     if (o.status === "in_progress" || o.status === "awaiting_info" || o.status === "ready_for_review") stats.inProgress += 1;
+    if (o.status === "awaiting_info") stats.awaitingInfo += 1;
     if (o.status === "delivered") stats.completed += 1;
     if (o.status === "cancelled") stats.cancelled += 1;
     if (o.payment_status === "paid") stats.revenuePaise += Math.round(Number(o.grand_total) * 100);

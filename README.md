@@ -17,7 +17,8 @@ Razorpay (INR) · Vitest · Vercel
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+npm run dev          # http://localhost:3000  (creates the local database first)
+npm run db:reset     # wipe and recreate the local database
 ```
 
 With **no Supabase credentials present**, the app starts an **embedded PostgreSQL** (PGlite — Postgres
@@ -119,6 +120,10 @@ validation from rows, order creation, duplicate-payment idempotency, ownership i
 dashboard stats, per-customer invitation isolation and publishing, and storage path/signature rules.
 
 Also verified by crawling the running app: 86 internal links, 0 broken.
+
+**Admin → System Status** (`/admin/status`) shows the live backend, a timed read, per-key settings
+timestamps, the last ten admin actions and a one-click *write test* — use it whenever a change needs
+confirming against the real database.
 
 ## 5. Environment variables
 

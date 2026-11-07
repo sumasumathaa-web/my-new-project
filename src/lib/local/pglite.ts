@@ -102,7 +102,26 @@ export function getLocalState(): Promise<LocalState> {
     globalThis.__weddingLocalDb = (async () => {
       const dir = path.join(process.cwd(), localDataDir());
       fs.mkdirSync(dir, { recursive: true });
-      const db = await PGlite.create({ dataDir: dir, parsers: TEXT_PARSERS });
+      let db: PGlite;
+      try {
+        db = await PGlite.create({ dataDir: dir, parsers: TEXT_PARSERS });
+      } catch (error) {
+        // Creating a fresh cluster inside the dev-server process can abort on
+        // memory pressure (WASM initdb). The predev script creates it out of
+        // process; if that was skipped, retry once after cleaning the remains.
+        const marker = path.join(dir, "PG_VERSION");
+        if (!fs.existsSync(marker)) {
+          fs.rmSync(dir, { recursive: true, force: true });
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        try {
+          db = await PGlite.create({ dataDir: dir, parsers: TEXT_PARSERS });
+        } catch {
+          throw new Error(
+            `Embedded database could not start (${(error as Error).message}). Run \`npm run db:reset\` and restart, or configure Supabase credentials instead.`,
+          );
+        }
+      }
       await bootstrap(db);
       const meta = await introspect(db);
       return { db, ...meta };

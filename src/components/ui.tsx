@@ -12,12 +12,21 @@ export function SectionHeading(props: {
   subtitle?: string;
   align?: "left" | "center";
 }) {
+  const centered = props.align === "center";
   return (
-    <div className={cx("mb-8 sm:mb-10", props.align === "center" ? "text-center" : "text-left")}>
-      {props.eyebrow ? <p className="eyebrow mb-2">{props.eyebrow}</p> : null}
-      <h2 className="text-balance font-serif text-2xl sm:text-3xl lg:text-4xl text-charcoal">{props.title}</h2>
+    <div className={cx("mb-9 sm:mb-12", centered ? "text-center" : "text-left")}>
+      {props.eyebrow ? (
+        <p className="eyebrow mb-3 flex items-center gap-3" style={centered ? { justifyContent: "center" } : undefined}>
+          <span aria-hidden className="inline-block h-px w-6 bg-gold/50" />
+          {props.eyebrow}
+          {centered ? <span aria-hidden className="inline-block h-px w-6 bg-gold/50" /> : null}
+        </p>
+      ) : null}
+      <h2 className="text-balance font-serif text-3xl leading-tight text-charcoal sm:text-4xl lg:text-[2.6rem]">
+        {props.title}
+      </h2>
       {props.subtitle ? (
-        <p className="mt-3 max-w-2xl text-sm sm:text-base text-charcoal-muted {props.align === 'center' ? 'mx-auto' : ''}">
+        <p className={cx("mt-3 max-w-2xl text-sm leading-relaxed text-charcoal-muted sm:text-base", centered && "mx-auto")}>
           {props.subtitle}
         </p>
       ) : null}

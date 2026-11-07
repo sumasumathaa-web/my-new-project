@@ -49,15 +49,18 @@
       focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-gold {
-    @apply btn text-cream shadow-card hover:brightness-95;
-    background-color: var(--brand-gold);
+    @apply btn text-cream hover:-translate-y-0.5;
+    background-image: linear-gradient(135deg, var(--brand-gold) 0%, #c9a874 55%, #9a7743 100%);
+    box-shadow: 0 10px 24px -12px rgba(176, 141, 87, 0.75), 0 2px 6px rgba(87, 22, 34, 0.08);
   }
+  .btn-gold:hover { box-shadow: 0 16px 34px -14px rgba(176, 141, 87, 0.85); }
   .btn-burgundy {
     @apply btn text-cream shadow-card hover:brightness-110;
     background-color: var(--brand-accent);
   }
   .btn-outline {
-    @apply btn border border-gold-light text-charcoal hover:border-gold hover:bg-champagne/60;
+    @apply btn border border-gold-light bg-cream/60 text-charcoal hover:-translate-y-0.5
+      hover:border-gold hover:bg-champagne/70;
   }
   .btn-ghost {
     @apply btn text-charcoal-soft hover:bg-champagne/70;
@@ -90,6 +93,60 @@
   .badge-blue { @apply badge bg-[#E3ECF6] text-[#2C5177]; }
   .badge-gray { @apply badge bg-[#ECE9E4] text-charcoal-soft; }
 
+
+  /* ---- Premium surfaces & ornament -------------------------------------- */
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1;
+    box-shadow: 0 1px 2px rgba(43, 38, 34, 0.04), 0 12px 30px -18px rgba(43, 38, 34, 0.35);
+  }
+  .card-hover:hover { box-shadow: 0 2px 4px rgba(43, 38, 34, 0.05), 0 26px 50px -24px rgba(43, 38, 34, 0.42); }
+  .card-inset { @apply rounded-2xl border border-[#EEE6D7] bg-ivory/70; }
+  .glass { @apply bg-ivory/85 backdrop-blur-md; }
+  .paper {
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(176, 141, 87, 0.10) 0%, transparent 42%),
+      radial-gradient(circle at 84% 8%, rgba(110, 30, 44, 0.07) 0%, transparent 38%),
+      radial-gradient(rgba(43, 38, 34, 0.035) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 22px 22px;
+  }
+  .gold-rule {
+    height: 1px;
+    background-image: linear-gradient(90deg, transparent, rgba(176, 141, 87, 0.55), transparent);
+  }
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: rgba(176, 141, 87, 0.9);
+  }
+  .ornament::before,
+  .ornament::after {
+    content: "";
+    height: 1px;
+    width: clamp(2rem, 12vw, 5rem);
+    background-image: linear-gradient(90deg, transparent, rgba(176, 141, 87, 0.6));
+  }
+  .ornament::after { background-image: linear-gradient(90deg, rgba(176, 141, 87, 0.6), transparent); }
+  .display-xl {
+    font-size: clamp(2.25rem, 5.2vw, 4.25rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+  }
+  .kpi {
+    @apply rounded-2xl border border-[#E8DFCE] bg-cream p-5 transition-all duration-300 hover:border-gold-light;
+    box-shadow: 0 1px 2px rgba(43, 38, 34, 0.04), 0 14px 30px -22px rgba(43, 38, 34, 0.35);
+  }
+  .admin-link {
+    @apply flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-charcoal-soft
+      transition-colors hover:bg-champagne/80 hover:text-charcoal;
+  }
+  .admin-link-active {
+    @apply bg-champagne font-semibold text-burgundy;
+    box-shadow: inset 2px 0 0 var(--brand-accent);
+  }
+  .table-wrap { @apply overflow-x-auto rounded-2xl border border-[#E8DFCE] bg-cream; }
+
   /* Motion (restrained) */
   .reveal {
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -108,5 +165,25 @@
   .text-balance { text-wrap: balance; }
   .clip-arch {
     border-radius: 12rem 12rem 1rem 1rem;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@layer utilities {
+  .fade-up { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .fade-up-1 { animation-delay: 0.08s; }
+  .fade-up-2 { animation-delay: 0.16s; }
+  .fade-up-3 { animation-delay: 0.24s; }
+  .float-soft { animation: floatSoft 7s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up, .float-soft { animation: none; }
+    .btn-gold:hover, .btn-outline:hover, .card-hover:hover { transform: none; }
   }
 }
